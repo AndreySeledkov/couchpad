@@ -1,148 +1,144 @@
-"""Generates the Couchpad support site in English (root), Ukrainian (uk/) and Russian (ru/).
-Edit the texts below and run: python3 build.py"""
-import os
+"""Generates the Cozyware studio site (https://cozyware.app) in English (root), Ukrainian (uk/) and Russian (ru/).
 
-EMAIL = "seledkovandrey@gmail.com"
+Pages per language:
+  /                      studio home
+  /couchpad/             Couchpad app page
+  /couchpad/support.html, /couchpad/privacy.html
+  /support.html, /privacy.html   legacy URLs given to App Store Connect (same content, canonical -> /couchpad/)
+
+Edit the texts (here and in texts_couchpad.py) and run: python3 build.py
+After the app is live in the App Store set APP_LIVE = True.
+"""
+import os
+from texts_couchpad import T as APP
+
+DOMAIN = "https://cozyware.app"
+HELLO = "hello@cozyware.app"
+SUPPORT = "support@cozyware.app"
+APP_ID = "6827098264"
+APP_STORE_URL = f"https://apps.apple.com/app/id{APP_ID}"
+APP_LIVE = False  # flip to True once Couchpad is approved and released
+
 STYLE = """
 :root{--bg:#0b0c10;--text:#e6e8ec;--dim:#8c919e;--amber:#ffb547;--line:#2b2e37}
 *{box-sizing:border-box}
+html{scroll-behavior:smooth;background:var(--bg)}
 body{margin:0;background:radial-gradient(ellipse at top,#2a2214 0%,var(--bg) 55%) fixed;color:var(--text);
 font:17px/1.6 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif}
-main{max-width:720px;margin:0 auto;padding:48px 20px 64px}
-header{display:flex;align-items:center;flex-wrap:wrap;gap:14px;margin-bottom:36px}
-header img{width:56px;height:56px;border-radius:13px;box-shadow:0 8px 24px rgba(0,0,0,.5)}
-header .brand{color:var(--text);text-decoration:none;font:800 24px/1 ui-rounded,-apple-system,sans-serif}
+main{max-width:760px;margin:0 auto;padding:40px 20px 64px}
+header{display:flex;align-items:center;flex-wrap:wrap;gap:14px;margin-bottom:44px}
+header img.logo{width:44px;height:44px;border-radius:11px;box-shadow:0 6px 20px rgba(0,0,0,.5)}
+header .brand{color:var(--text);text-decoration:none;font:800 22px/1 ui-rounded,-apple-system,sans-serif;letter-spacing:-.3px}
 nav{margin-left:auto;display:flex;flex-wrap:wrap;gap:18px;align-items:center}
 nav a{color:var(--dim);text-decoration:none;font:600 15px/1.4 -apple-system,BlinkMacSystemFont,sans-serif}
 nav a:hover,nav a.on{color:var(--amber)}
 .langs{display:flex;gap:10px;padding-left:14px;border-left:1px solid var(--line)}
-h1{font:800 34px/1.2 ui-rounded,-apple-system,sans-serif;margin:0 0 8px}
-h2{font:700 21px/1.3 ui-rounded,-apple-system,sans-serif;margin:36px 0 8px;color:var(--amber)}
+h1{font:800 40px/1.15 ui-rounded,-apple-system,sans-serif;margin:0 0 12px;letter-spacing:-.6px}
+h2{font:700 21px/1.3 ui-rounded,-apple-system,sans-serif;margin:44px 0 10px;color:var(--amber)}
 p,li{color:#cfd2d8} a{color:var(--amber)}
 .lead{font-size:20px;color:var(--dim);margin:0 0 28px}
 .card{background:linear-gradient(#24262e,#16171c);border:1px solid var(--line);border-radius:18px;padding:20px 22px;margin:14px 0}
 .card h3{margin:0 0 6px;font-size:17px;color:var(--text)}
 .card p{margin:0}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.grid .card{margin:0}
+.app{display:flex;gap:18px;align-items:center;text-decoration:none;color:inherit}
+.app img{width:72px;height:72px;border-radius:17px;flex:none;box-shadow:0 8px 24px rgba(0,0,0,.5)}
+.app h3{font-size:19px}
+.app .tag{color:var(--amber);font-weight:600;font-size:14px;margin:0 0 4px}
+.app:hover{border-color:#4a3c22}
+.hero{display:flex;gap:20px;align-items:center;margin-bottom:22px}
+.hero img{width:84px;height:84px;border-radius:20px;box-shadow:0 10px 30px rgba(0,0,0,.55);flex:none}
+.hero h1{margin:0}
+.btns{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin:8px 0 6px}
 .btn{display:inline-block;background:linear-gradient(#ffb547,#ee7a19);color:#1a1205;font-weight:700;text-decoration:none;
 padding:14px 26px;border-radius:999px;box-shadow:0 0 24px rgba(255,181,71,.35)}
+.btn.ghost{background:none;color:var(--text);border:1px solid var(--line);box-shadow:none}
+.btn.off{background:#23252c;color:var(--dim);box-shadow:none;cursor:default}
+.shots{display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;padding:6px 2px 18px;margin:0 -20px;padding-left:20px;padding-right:20px}
+.shots img{height:360px;width:auto;border-radius:20px;scroll-snap-align:start;flex:none;border:1px solid var(--line)}
 footer{margin-top:56px;color:var(--dim);font-size:14px;border-top:1px solid var(--line);padding-top:20px}
-@media (max-width:520px){nav{margin-left:0;width:100%}h1{font-size:28px}}
+footer a{color:var(--dim)}
+@media (max-width:640px){.grid{grid-template-columns:1fr}h1{font-size:31px}nav{margin-left:0;width:100%}.shots img{height:380px}}
+@media (max-width:420px){.hero{flex-direction:column;align-items:flex-start}}
 """
 
-T = {
+STUDIO = {
 "en": dict(
-    html_lang="en", support="Support", privacy="Privacy",
-    footer="Couchpad is not affiliated with LG, Samsung, Sony, Roku or Google. All trademarks belong to their owners.",
-    index_title="Couchpad — Simple TV remote", index_desc="Simple TV remote. Simple price. Control your TV from your iPhone over Wi-Fi.",
-    index_h1="Simple TV remote.<br>Simple price.",
-    index_lead="Control your TV from your iPhone over Wi-Fi. No ads, no accounts, no cloud. Try it free for 7 days.",
-    cards=[("Works with your TV","LG webOS, Samsung Tizen, Sony BRAVIA, Android TV, Google TV and Roku."),
-           ("More than buttons","Touchpad, keyboard, one-tap app launch, inputs, volume and channels."),
-           ("Private by design","Your phone talks to the TV directly on your home network. Nothing is sent to us.")],
-    get_help="Get help",
-    privacy_title="Privacy Policy", effective="Effective October 25, 2026",
-    privacy_body="""<p>Couchpad is a TV remote app for iPhone. This policy explains what information the app uses and what happens to it. The short version: <strong>we do not collect any personal data.</strong></p>
-<h2>Information we collect</h2><p>None. Couchpad has no user accounts, no analytics, no advertising and no tracking. The app does not send any information to us or to third parties.</p>
-<h2>Information stored on your device</h2><p>To remember your TVs, the app stores on your iPhone only:</p>
-<ul><li>the names, network addresses and network (MAC) addresses of the TVs you add, and the names you give them;</li><li>the pairing keys your TVs issue to the app, kept in the iOS Keychain;</li><li>your app settings, such as the language.</li></ul>
-<p>This information never leaves your device except as part of your encrypted iPhone backup. Removing a TV in the app or deleting the app removes it.</p>
-<h2>Local network</h2><p>Couchpad asks for Local Network access to find TVs on your Wi-Fi and send them commands. All communication happens directly between your iPhone and your TV inside your home network. The app does not connect to any server of ours.</p>
-<h2>Subscription</h2><p>The Couchpad subscription is sold through Apple's App Store. Payments are processed by Apple; we do not receive your payment details. Apple tells the app only whether your subscription or free trial is active. See <a href="https://www.apple.com/legal/privacy/">Apple's Privacy Policy</a>.</p>
-<h2>Children</h2><p>Couchpad does not knowingly collect information from anyone, including children under 13.</p>
-<h2>Changes</h2><p>If this policy changes, we will update this page and the date above.</p>
-<h2>Contact</h2><p>Questions about privacy: <a href="mailto:{email}">{email}</a></p>""",
-    support_title="Support",
-    support_lead="""Something not working? Write to <a href="mailto:{email}?subject=Couchpad%20support">{email}</a> — we usually reply within 1–2 days. In the app, Settings › Contact Support adds your iPhone and TV details to the email automatically.""",
-    faq_title="Frequently asked questions",
-    faq=[("The app doesn't find my TV","Make sure the TV is on and your iPhone is on the same Wi-Fi network (not a guest network). Check that Couchpad is allowed in iPhone Settings › Privacy &amp; Security › Local Network. Then tap Search Network again — it takes up to 20 seconds."),
-         ("How do I connect without the TV's remote?","LG, Sony and Android TV / Google TV show a code on the screen — type it in the app. Samsung asks you to select Allow on the TV once. Roku needs no confirmation."),
-         ("The code didn't appear on my LG TV","Some webOS versions don't support code pairing. Long-press the TV in the list and choose Confirm with TV Remote, then select Yes on the TV."),
-         ("Roku doesn't respond to buttons","On the Roku, open Settings › System › Advanced system settings › Control by mobile apps and set it to Default or Permissive."),
-         ("I can turn the TV off, but not on","Turning on works over Wi-Fi only if the TV supports it. LG: turn on Settings › General › Devices › TV Management › Turn on via Wi-Fi. Samsung: Settings › General › Network › Expert Settings › Power On with Mobile. Turn the TV on with its remote once afterwards so the app can learn it."),
-         ("The TV says the app is no longer recognized","This happens after a TV reset. Remove the TV in the app and add it again."),
-         ("How does the subscription work?","Finding and adding your TV is free, so you can check it's supported. The remote needs a subscription: 7 days free, then monthly or yearly. If you cancel during the free week, you won't be charged."),
-         ("How do I cancel or restore the subscription?","Cancel: iPhone Settings › your name › Subscriptions › Couchpad, at least 24 hours before renewal. Restore on a new iPhone: in the app, Settings › Restore Purchases."),
-         ("How do I change the app's language?","In the app, Settings › Language: English, Українська or Русский. System follows your iPhone's language.")],
+    tagline="Small apps, cozy by design.",
+    lead="Cozyware is an independent studio making simple, private apps for iPhone. No accounts, no ads, no tracking — just tools that do one thing well.",
+    desc="Cozyware is an independent studio making simple, private apps for iPhone.",
+    apps_h="Our apps", app_tag="Simple TV remote",
+    app_blurb="Control your TV from your iPhone over Wi-Fi. No hub, no account, no cloud.",
+    learn="Learn more", principles_h="How we make apps",
+    principles=[("Private by design", "Your data stays on your device. We don't run analytics, ads or trackers."),
+                ("Fair and simple", "Clear prices, a free trial where it makes sense, and no dark patterns."),
+                ("Calm interfaces", "Focused screens that do one job well and stay out of your way.")],
+    contact_h="Say hello", contact_p="Questions, ideas or press? Write to <a href=\"mailto:{e}\">{e}</a>.",
+    store="Download on the App Store", soon="Coming soon to the App Store",
+    shots_h="See it in action",
+    footer_studio="Cozyware — small apps, cozy by design.",
 ),
 "uk": dict(
-    html_lang="uk", support="Підтримка", privacy="Конфіденційність",
-    footer="Couchpad не пов'язаний з LG, Samsung, Sony, Roku чи Google. Усі торговельні марки належать їхнім власникам.",
-    index_title="Couchpad — простий пульт для ТВ", index_desc="Простий пульт. Проста ціна. Керуйте телевізором з iPhone через Wi-Fi.",
-    index_h1="Простий пульт.<br>Проста ціна.",
-    index_lead="Керуйте телевізором з iPhone через Wi-Fi. Без реклами, без акаунтів, без хмари. 7 днів безкоштовно.",
-    cards=[("Працює з вашим ТВ","LG webOS, Samsung Tizen, Sony BRAVIA, Android TV, Google TV і Roku."),
-           ("Більше, ніж кнопки","Тачпад, клавіатура, запуск застосунків одним дотиком, джерела, гучність і канали."),
-           ("Приватність за замовчуванням","Телефон працює з ТВ напряму в домашній мережі. Нам нічого не надсилається.")],
-    get_help="Допомога",
-    privacy_title="Політика конфіденційності", effective="Діє з 25 жовтня 2026 року",
-    privacy_body="""<p>Couchpad — застосунок-пульт для телевізора на iPhone. Ця політика пояснює, яку інформацію використовує застосунок і що з нею відбувається. Коротко: <strong>ми не збираємо жодних персональних даних.</strong></p>
-<h2>Які дані ми збираємо</h2><p>Жодних. У Couchpad немає акаунтів, аналітики, реклами чи відстеження. Застосунок не надсилає інформацію ні нам, ні третім особам.</p>
-<h2>Дані на вашому пристрої</h2><p>Щоб пам'ятати ваші ТВ, застосунок зберігає на iPhone лише:</p>
-<ul><li>назви, мережеві адреси й MAC-адреси доданих ТВ і назви, які ви їм дали;</li><li>ключі підключення, які видають телевізори, — у Keychain iOS;</li><li>налаштування застосунку, наприклад мову.</li></ul>
-<p>Ці дані не залишають пристрій, окрім як у складі зашифрованої резервної копії iPhone. Видалення ТВ у застосунку або видалення застосунку їх стирає.</p>
-<h2>Локальна мережа</h2><p>Couchpad просить доступ до локальної мережі, щоб знаходити ТВ у вашому Wi-Fi і надсилати їм команди. Увесь обмін відбувається напряму між iPhone і телевізором у домашній мережі. Застосунок не підключається до наших серверів.</p>
-<h2>Підписка</h2><p>Підписка Couchpad продається через App Store. Платежі обробляє Apple; ми не отримуємо ваших платіжних даних. Apple повідомляє застосунку лише, чи активна підписка або пробний період. Див. <a href="https://www.apple.com/legal/privacy/">Політику конфіденційності Apple</a>.</p>
-<h2>Діти</h2><p>Couchpad свідомо не збирає інформацію ні від кого, зокрема від дітей до 13 років.</p>
-<h2>Зміни</h2><p>Якщо політика зміниться, ми оновимо цю сторінку й дату вище.</p>
-<h2>Контакт</h2><p>Питання щодо конфіденційності: <a href="mailto:{email}">{email}</a></p>""",
-    support_title="Підтримка",
-    support_lead="""Щось не працює? Напишіть на <a href="mailto:{email}?subject=Couchpad%20support">{email}</a> — зазвичай відповідаємо протягом 1–2 днів. У застосунку Налаштування › Написати в підтримку автоматично додає до листа дані про iPhone і ТВ.""",
-    faq_title="Часті запитання",
-    faq=[("Застосунок не знаходить ТВ","Переконайтеся, що ТВ увімкнений, а iPhone у тій самій мережі Wi-Fi (не гостьовій). Перевірте, що Couchpad дозволено в Налаштування iPhone › Конфіденційність і безпека › Локальна мережа. Потім знову натисніть «Шукати в мережі» — це займає до 20 секунд."),
-         ("Як підключитися без пульта від ТВ?","LG, Sony та Android TV / Google TV показують код на екрані — введіть його в застосунку. Samsung один раз просить натиснути «Дозволити» на ТВ. Roku не потребує підтвердження."),
-         ("На LG не з'явився код","Деякі версії webOS не підтримують підключення за кодом. Довго натисніть на ТВ у списку, виберіть «Підтвердити пультом ТВ» і натисніть «Так» на телевізорі."),
-         ("Roku не реагує на кнопки","На Roku відкрийте Settings › System › Advanced system settings › Control by mobile apps і виберіть Default або Permissive."),
-         ("ТВ вимикається, але не вмикається","Увімкнення через Wi-Fi працює, лише якщо ТВ це підтримує. LG: Налаштування › Загальні › Пристрої › Керування ТВ › Увімкнення через Wi-Fi. Samsung: Налаштування › Загальні › Мережа › Експертні налаштування › Увімкнення з мобільного. Після цього один раз увімкніть ТВ його пультом, щоб застосунок його запам'ятав."),
-         ("ТВ пише, що більше не впізнає застосунок","Так буває після скидання ТВ. Видаліть ТВ у застосунку й додайте знову."),
-         ("Як працює підписка?","Знайти й додати ТВ можна безкоштовно — так ви перевірите, що він підтримується. Для пульта потрібна підписка: 7 днів безкоштовно, далі щомісяця або щороку. Якщо скасувати протягом безкоштовного тижня, оплати не буде."),
-         ("Як скасувати або відновити підписку?","Скасувати: Налаштування iPhone › ваше ім'я › Підписки › Couchpad, щонайменше за 24 години до продовження. Відновити на новому iPhone: у застосунку Налаштування › Відновити покупки."),
-         ("Як змінити мову застосунку?","У застосунку Налаштування › Мова: English, Українська або Русский. «Як у системі» — мова вашого iPhone.")],
+    tagline="Невеликі застосунки, затишні за задумом.",
+    lead="Cozyware — незалежна студія, що створює прості й приватні застосунки для iPhone. Без акаунтів, реклами та стеження — лише інструменти, які добре роблять одну справу.",
+    desc="Cozyware — незалежна студія, що створює прості й приватні застосунки для iPhone.",
+    apps_h="Наші застосунки", app_tag="Простий пульт для ТВ",
+    app_blurb="Керуйте телевізором з iPhone через Wi-Fi. Без хаба, без акаунта, без хмари.",
+    learn="Докладніше", principles_h="Як ми робимо застосунки",
+    principles=[("Приватність за замовчуванням", "Ваші дані залишаються на вашому пристрої. Ми не використовуємо аналітику, рекламу чи трекери."),
+                ("Чесно й просто", "Зрозумілі ціни, безкоштовний пробний період там, де це доречно, і жодних темних патернів."),
+                ("Спокійні інтерфейси", "Зосереджені екрани, що добре роблять одну справу й не заважають.")],
+    contact_h="Привітайтеся", contact_p="Питання, ідеї чи преса? Пишіть на <a href=\"mailto:{e}\">{e}</a>.",
+    store="Завантажити в App Store", soon="Незабаром в App Store",
+    shots_h="Дивіться в дії",
+    footer_studio="Cozyware — невеликі застосунки, затишні за задумом.",
 ),
 "ru": dict(
-    html_lang="ru", support="Поддержка", privacy="Конфиденциальность",
-    footer="Couchpad не связан с LG, Samsung, Sony, Roku или Google. Все товарные знаки принадлежат их владельцам.",
-    index_title="Couchpad — простой пульт для ТВ", index_desc="Простой пульт. Простая цена. Управляйте телевизором с iPhone через Wi-Fi.",
-    index_h1="Простой пульт.<br>Простая цена.",
-    index_lead="Управляйте телевизором с iPhone через Wi-Fi. Без рекламы, без аккаунтов, без облака. 7 дней бесплатно.",
-    cards=[("Работает с вашим ТВ","LG webOS, Samsung Tizen, Sony BRAVIA, Android TV, Google TV и Roku."),
-           ("Больше, чем кнопки","Тачпад, клавиатура, запуск приложений одним касанием, источники, громкость и каналы."),
-           ("Приватность по умолчанию","Телефон работает с ТВ напрямую в домашней сети. Нам ничего не отправляется.")],
-    get_help="Помощь",
-    privacy_title="Политика конфиденциальности", effective="Действует с 25 октября 2026 года",
-    privacy_body="""<p>Couchpad — приложение-пульт для телевизора на iPhone. Эта политика объясняет, какую информацию использует приложение и что с ней происходит. Коротко: <strong>мы не собираем никаких персональных данных.</strong></p>
-<h2>Какие данные мы собираем</h2><p>Никаких. В Couchpad нет аккаунтов, аналитики, рекламы и отслеживания. Приложение не отправляет информацию ни нам, ни третьим лицам.</p>
-<h2>Данные на вашем устройстве</h2><p>Чтобы помнить ваши ТВ, приложение хранит на iPhone только:</p>
-<ul><li>названия, сетевые адреса и MAC-адреса добавленных ТВ и имена, которые вы им дали;</li><li>ключи подключения, которые выдают телевизоры, — в Keychain iOS;</li><li>настройки приложения, например язык.</li></ul>
-<p>Эти данные не покидают устройство, кроме как в составе зашифрованной резервной копии iPhone. Удаление ТВ в приложении или удаление приложения их стирает.</p>
-<h2>Локальная сеть</h2><p>Couchpad запрашивает доступ к локальной сети, чтобы находить ТВ в вашем Wi-Fi и отправлять им команды. Весь обмен идёт напрямую между iPhone и телевизором в домашней сети. Приложение не подключается к нашим серверам.</p>
-<h2>Подписка</h2><p>Подписка Couchpad продаётся через App Store. Платежи обрабатывает Apple; мы не получаем ваших платёжных данных. Apple сообщает приложению только, активна ли подписка или пробный период. См. <a href="https://www.apple.com/legal/privacy/">Политику конфиденциальности Apple</a>.</p>
-<h2>Дети</h2><p>Couchpad сознательно не собирает информацию ни от кого, включая детей до 13 лет.</p>
-<h2>Изменения</h2><p>Если политика изменится, мы обновим эту страницу и дату выше.</p>
-<h2>Контакт</h2><p>Вопросы о конфиденциальности: <a href="mailto:{email}">{email}</a></p>""",
-    support_title="Поддержка",
-    support_lead="""Что-то не работает? Напишите на <a href="mailto:{email}?subject=Couchpad%20support">{email}</a> — обычно отвечаем в течение 1–2 дней. В приложении Настройки › Написать в поддержку автоматически добавляет к письму данные об iPhone и ТВ.""",
-    faq_title="Частые вопросы",
-    faq=[("Приложение не находит ТВ","Убедитесь, что ТВ включён, а iPhone в той же сети Wi-Fi (не гостевой). Проверьте, что Couchpad разрешён в Настройки iPhone › Конфиденциальность и безопасность › Локальная сеть. Затем снова нажмите «Искать в сети» — это занимает до 20 секунд."),
-         ("Как подключиться без пульта от ТВ?","LG, Sony и Android TV / Google TV показывают код на экране — введите его в приложении. Samsung один раз просит нажать «Разрешить» на ТВ. Roku не требует подтверждения."),
-         ("На LG не появился код","Некоторые версии webOS не поддерживают подключение по коду. Долго нажмите на ТВ в списке, выберите «Подтвердить пультом ТВ» и нажмите «Да» на телевизоре."),
-         ("Roku не реагирует на кнопки","На Roku откройте Settings › System › Advanced system settings › Control by mobile apps и выберите Default или Permissive."),
-         ("ТВ выключается, но не включается","Включение через Wi-Fi работает, только если ТВ это поддерживает. LG: Настройки › Общие › Устройства › Управление ТВ › Включение через Wi-Fi. Samsung: Настройки › Общие › Сеть › Экспертные настройки › Включение с мобильного. После этого один раз включите ТВ его пультом, чтобы приложение его запомнило."),
-         ("ТВ пишет, что больше не узнаёт приложение","Так бывает после сброса ТВ. Удалите ТВ в приложении и добавьте заново."),
-         ("Как работает подписка?","Найти и добавить ТВ можно бесплатно — так вы проверите, что он поддерживается. Для пульта нужна подписка: 7 дней бесплатно, затем ежемесячно или ежегодно. Если отменить в течение бесплатной недели, оплаты не будет."),
-         ("Как отменить или восстановить подписку?","Отменить: Настройки iPhone › ваше имя › Подписки › Couchpad, не позднее чем за 24 часа до продления. Восстановить на новом iPhone: в приложении Настройки › Восстановить покупки."),
-         ("Как сменить язык приложения?","В приложении Настройки › Язык: English, Українська или Русский. «Как в системе» — язык вашего iPhone.")],
+    tagline="Небольшие приложения, уютные по задумке.",
+    lead="Cozyware — независимая студия, создающая простые и приватные приложения для iPhone. Без аккаунтов, рекламы и слежки — только инструменты, которые хорошо делают одно дело.",
+    desc="Cozyware — независимая студия, создающая простые и приватные приложения для iPhone.",
+    apps_h="Наши приложения", app_tag="Простой пульт для ТВ",
+    app_blurb="Управляйте телевизором с iPhone через Wi-Fi. Без хаба, без аккаунта, без облака.",
+    learn="Подробнее", principles_h="Как мы делаем приложения",
+    principles=[("Приватность по умолчанию", "Ваши данные остаются на вашем устройстве. Мы не используем аналитику, рекламу и трекеры."),
+                ("Честно и просто", "Понятные цены, бесплатный пробный период там, где это уместно, и никаких тёмных паттернов."),
+                ("Спокойные интерфейсы", "Сосредоточенные экраны, которые хорошо делают одно дело и не мешают.")],
+    contact_h="Поздоровайтесь", contact_p="Вопросы, идеи или пресса? Пишите на <a href=\"mailto:{e}\">{e}</a>.",
+    store="Скачать в App Store", soon="Скоро в App Store",
+    shots_h="Смотрите в действии",
+    footer_studio="Cozyware — небольшие приложения, уютные по задумке.",
 ),
 }
 LANGS = [("en", "EN", ""), ("uk", "UA", "uk/"), ("ru", "RU", "ru/")]
+HREFLANG = {"en": "en", "uk": "uk", "ru": "ru"}
 
-def page(lang, name, title, desc, content):
-    t = T[lang]
-    prefix = "" if lang == "en" else "../"
-    here = dict((l, p) for l, _, p in LANGS)[lang]
+
+def url(lang, rel):
+    """Absolute path of page `rel` ('index.html', 'couchpad/support.html', ...) in `lang`."""
+    prefix = dict((l, p) for l, _, p in LANGS)[lang]
+    path = rel[:-len("index.html")] if rel.endswith("index.html") else rel
+    return "/" + prefix + path
+
+
+def store_button(lang):
+    s = STUDIO[lang]
+    if APP_LIVE:
+        return f'<a class="btn" href="{APP_STORE_URL}">{s["store"]}</a>'
+    return f'<span class="btn off">{s["soon"]}</span>'
+
+
+def page(lang, rel, title, desc, content, canonical_rel=None, app_page=False):
+    t = APP[lang]
+    here = canonical_rel or rel
     links = "".join(
-        f'<a href="{prefix}{p}{name}"{" class=on" if l == lang else ""} hreflang="{l}">{label}</a>'
-        for l, label, p in LANGS)
-    alternates = "".join(f'<link rel="alternate" hreflang="{l}" href="https://andreyseledkov.github.io/couchpad/{p}{name}">' for l, _, p in LANGS)
+        f'<a href="{url(l, here)}"{" class=on" if l == lang else ""} hreflang="{HREFLANG[l]}">{label}</a>'
+        for l, label, _ in LANGS)
+    alternates = "".join(f'<link rel="alternate" hreflang="{HREFLANG[l]}" href="{DOMAIN}{url(l, here)}">' for l, _, _ in LANGS)
+    alternates += f'<link rel="alternate" hreflang="x-default" href="{DOMAIN}{url("en", here)}">'
+    canonical = f'{DOMAIN}{url(lang, here)}'
+    banner = f'<meta name="apple-itunes-app" content="app-id={APP_ID}">' if (app_page and APP_LIVE) else ""
+    nav_class = lambda r: " class=on" if here.startswith(r) else ""
     return f"""<!doctype html>
 <html lang="{t['html_lang']}">
 <head>
@@ -150,45 +146,112 @@ def page(lang, name, title, desc, content):
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{title}</title>
 <meta name="description" content="{desc}">
-<link rel="icon" href="{prefix}icon.png">
+<link rel="canonical" href="{canonical}">
+<link rel="icon" href="/logo.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#0b0c10">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Cozyware">
+<meta property="og:title" content="{title}">
+<meta property="og:description" content="{desc}">
+<meta property="og:url" content="{canonical}">
+<meta property="og:image" content="{DOMAIN}/og.png">
+<meta name="twitter:card" content="summary_large_image">
+{banner}
 {alternates}
 <style>{STYLE}</style>
 </head>
 <body>
 <main>
 <header>
-<img src="{prefix}icon.png" alt="">
-<a class="brand" href="index.html">Couchpad</a>
-<nav><a href="support.html">{t['support']}</a><a href="privacy.html">{t['privacy']}</a><span class="langs">{links}</span></nav>
+<img class="logo" src="/logo.svg" alt="">
+<a class="brand" href="{url(lang, 'index.html')}">Cozyware</a>
+<nav><a href="{url(lang, 'couchpad/index.html')}"{nav_class('couchpad/index')}>Couchpad</a><a href="{url(lang, 'couchpad/support.html')}"{nav_class('couchpad/support')}>{t['support']}</a><a href="{url(lang, 'couchpad/privacy.html')}"{nav_class('couchpad/privacy')}>{t['privacy']}</a><span class="langs">{links}</span></nav>
 </header>
 {content}
-<footer>© 2026 Couchpad · <a href="mailto:{EMAIL}">{EMAIL}</a><br>{t['footer']}</footer>
+<footer>© 2026 Cozyware · <a href="mailto:{HELLO}">{HELLO}</a>{'<br>' + t['footer'] if app_page else ''}</footer>
 </main>
 </body>
 </html>
 """
 
-for lang, _, path in LANGS:
-    t = T[lang]
-    os.makedirs(path or ".", exist_ok=True)
+
+def studio_home(lang):
+    s = STUDIO[lang]
+    principles = "".join(f'<div class="card"><h3>{h}</h3><p>{p}</p></div>' for h, p in s["principles"])
+    return f"""<h1>{s['tagline']}</h1>
+<p class="lead">{s['lead']}</p>
+<h2>{s['apps_h']}</h2>
+<a class="card app" href="{url(lang, 'couchpad/index.html')}">
+<img src="/couchpad/icon.png" alt="Couchpad" width="72" height="72">
+<div><p class="tag">{s['app_tag']}</p><h3>Couchpad</h3><p>{s['app_blurb']}</p></div>
+</a>
+<h2>{s['principles_h']}</h2>
+<div class="grid">{principles}</div>
+<h2>{s['contact_h']}</h2>
+<p>{s['contact_p'].format(e=HELLO)}</p>"""
+
+
+def app_home(lang):
+    t, s = APP[lang], STUDIO[lang]
     cards = "".join(f'<div class="card"><h3>{h}</h3><p>{p}</p></div>' for h, p in t["cards"])
-    index = f"""<h1>{t['index_h1']}</h1>
+    shots = "".join(
+        f'<img src="/couchpad/img/{lang}-{n}.jpg" width="260" height="565" alt="Couchpad screenshot {n}" loading="lazy">'
+        for n in (1, 2, 3, 5))
+    return f"""<div class="hero"><img src="/couchpad/icon.png" alt="" width="84" height="84"><div><h1>Couchpad</h1><p class="lead" style="margin:0">{s['app_tag']}</p></div></div>
 <p class="lead">{t['index_lead']}</p>
-{cards}
-<p style="margin-top:28px"><a class="btn" href="support.html">{t['get_help']}</a></p>"""
-    privacy = f"""<h1>{t['privacy_title']}</h1>
+<div class="btns">{store_button(lang)}<a class="btn ghost" href="{url(lang, 'couchpad/support.html')}">{t['get_help']}</a></div>
+<h2>{s['shots_h']}</h2>
+<div class="shots">{shots}</div>
+{cards}"""
+
+
+def privacy_content(lang):
+    t = APP[lang]
+    return f"""<h1>{t['privacy_title']}</h1>
 <p class="lead">{t['effective']}</p>
-{t['privacy_body'].format(email=EMAIL)}"""
+{t['privacy_body'].format(email=SUPPORT)}"""
+
+
+def support_content(lang):
+    t = APP[lang]
     faq = "".join(f'<div class="card"><h3>{q}</h3><p>{a}</p></div>' for q, a in t["faq"])
-    support = f"""<h1>{t['support_title']}</h1>
-<p class="lead">{t['support_lead'].format(email=EMAIL)}</p>
+    return f"""<h1>{t['support_title']}</h1>
+<p class="lead">{t['support_lead'].format(email=SUPPORT)}</p>
 <h2>{t['faq_title']}</h2>
 {faq}"""
-    for name, title, desc, content in [
-        ("index.html", t["index_title"], t["index_desc"], index),
-        ("privacy.html", f"{t['privacy_title']} — Couchpad", t["privacy_title"], privacy),
-        ("support.html", f"{t['support_title']} — Couchpad", t["support_title"], support),
-    ]:
-        with open(os.path.join(path, name), "w", encoding="utf-8") as f:
-            f.write(page(lang, name, title, desc, content))
-print("built")
+
+
+def write(path, text):
+    os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(text)
+
+
+urls = []
+for lang, _, prefix in LANGS:
+    t, s = APP[lang], STUDIO[lang]
+    pages = [
+        ("index.html", None, f"Cozyware — {s['tagline']}", s["desc"], studio_home(lang), False),
+        ("couchpad/index.html", None, t["index_title"], t["index_desc"], app_home(lang), True),
+        ("couchpad/privacy.html", None, f"{t['privacy_title']} — Couchpad", t["privacy_title"], privacy_content(lang), True),
+        ("couchpad/support.html", None, f"{t['support_title']} — Couchpad", t["support_title"], support_content(lang), True),
+        # legacy URLs already submitted to App Store Connect — keep them working
+        ("privacy.html", "couchpad/privacy.html", f"{t['privacy_title']} — Couchpad", t["privacy_title"], privacy_content(lang), True),
+        ("support.html", "couchpad/support.html", f"{t['support_title']} — Couchpad", t["support_title"], support_content(lang), True),
+    ]
+    for rel, canon, title, desc, content, app_page in pages:
+        write(prefix + rel, page(lang, rel, title, desc, content, canonical_rel=canon, app_page=app_page))
+        if canon is None:
+            urls.append(url(lang, rel))
+
+write("sitemap.xml", '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
+      "".join(f"<url><loc>{DOMAIN}{u}</loc></url>\n" for u in urls) + "</urlset>\n")
+write("robots.txt", f"User-agent: *\nAllow: /\nSitemap: {DOMAIN}/sitemap.xml\n")
+write("CNAME", "cozyware.app\n")
+write("404.html", f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Not found — Cozyware</title><link rel="icon" href="/logo.svg" type="image/svg+xml"><style>{STYLE}</style></head>
+<body><main><header><img class="logo" src="/logo.svg" alt=""><a class="brand" href="/">Cozyware</a></header>
+<h1>Page not found</h1><p class="lead">This page doesn't exist. <a href="/">Back to the home page</a>.</p></main></body></html>
+""")
+print("built", len(urls), "pages per site")
